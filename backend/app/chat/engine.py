@@ -55,9 +55,39 @@ from app.chat.utils import build_title_for_document
 from app.chat.pg_vector import get_vector_store_singleton
 from app.chat.qa_response_synth import get_custom_response_synth
 
+import torch
+# from transformers import BitsAndBytesConfig
+from llama_index.prompts import PromptTemplate
+from llama_index.llms import HuggingFaceLLM
+from llama_index import ServiceContext
 
 logger = logging.getLogger(__name__)
 
+# quantization_config = BitsAndBytesConfig(
+#     load_in_4bit=True,
+#     bnb_4bit_compute_dtype=torch.float16,
+#     bnb_4bit_quant_type="nf4",
+#     bnb_4bit_use_double_quant=True,
+# )
+
+def messages_to_prompt(messages):
+  prompt = ""
+  for message in messages:
+    if message.role == 'system':
+      prompt += f"<|system|>\n{message.content}</s>\n"
+    elif message.role == 'user':
+      prompt += f"<|user|>\n{message.content}</s>\n"
+    elif message.role == 'assistant':
+      prompt += f"<|assistant|>\n{message.content}</s>\n"
+
+  # ensure we start with a system prompt, insert blank if needed
+  if not prompt.startswith("<|system|>\n"):
+    prompt = "<|system|>\n</s>\n" + prompt
+
+  # add final assistant prompt
+  prompt = prompt + "<|assistant|>\n"
+
+  return prompt
 
 logger.info("Applying nested asyncio patch")
 nest_asyncio.apply()
@@ -211,13 +241,26 @@ def get_chat_history(
 def get_tool_service_context(
     callback_handlers: List[BaseCallbackHandler],
 ) -> ServiceContext:
-    llm = OpenAI(
-        temperature=0,
-        model="gpt-3.5-turbo-0613",
-        streaming=False,
-        api_key=settings.OPENAI_API_KEY,
-        additional_kwargs={"api_key": settings.OPENAI_API_KEY},
+    # llm = OpenAI(
+    #     temperature=0,
+    #     model="gpt-3.5-turbo-0613",
+    #     streaming=False,
+    #     api_key=settings.OPENAI_API_KEY,
+    #     additional_kwargs={"api_key": settings.OPENAI_API_KEY},
+    # )
+    llm = HuggingFaceLLM(
+        model_name="HuggingFaceH4/zephyr-7b-beta",
+        tokenizer_name="HuggingFaceH4/zephyr-7b-beta",
+        query_wrapper_prompt=PromptTemplate("<|system|>\n</s>\n<|user|>\n{query_str}</s>\n<|assistant|>\n"),
+        context_window=5000,
+        max_new_tokens=512,
+        # model_kwargs={"quantization_config": quantization_config},
+        # tokenizer_kwargs={},
+        generate_kwargs={"temperature": 0.5, "top_k": 50, "top_p": 0.95},
+        messages_to_prompt=messages_to_prompt,
+        device_map="auto",
     )
+    
     callback_manager = CallbackManager(callback_handlers)
     embedding_model = OpenAIEmbedding(
         mode=OpenAIEmbeddingMode.SIMILARITY_MODE,
@@ -230,12 +273,14 @@ def get_tool_service_context(
         chunk_overlap=NODE_PARSER_CHUNK_OVERLAP,
         callback_manager=callback_manager,
     )
-    service_context = ServiceContext.from_defaults(
-        callback_manager=callback_manager,
-        llm=llm,
-        embed_model=embedding_model,
-        node_parser=node_parser,
-    )
+    # service_context = ServiceContext.from_defaults(
+    #     callback_manager=callback_manager,
+    #     llm=llm,
+    #     embed_model=embedding_model,
+    #     node_parser=node_parser,
+    # )
+    service_context = ServiceContext.from_defaults(llm=llm, embed_model="local:BAAI/bge-small-en-v1.5",
+        node_parser=node_parser, callback_manager=callback_manager,)
     return service_context
 
 
