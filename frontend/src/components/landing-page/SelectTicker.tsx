@@ -69,7 +69,7 @@ export const DocumentSelectCombobox: React.FC<DocumentSelectComboboxProps> = ({
     },
     items: filteredDocuments,
     itemToString(item) {
-      return item ? item.ticker : "";
+      return item ? item.fullName : "";
     },
     selectedItem,
     onSelectedItemChange: ({ selectedItem: newSelectedItem }) => {
@@ -86,7 +86,7 @@ export const DocumentSelectCombobox: React.FC<DocumentSelectComboboxProps> = ({
             <HiOutlineBuildingOffice2 size={20} />
           </div>
           <input
-            placeholder="Search by company ticker or name"
+            placeholder="Search by book's name"
             className="align-center mt-[5px] w-full p-1.5 focus:outline-none "
             {...getInputProps({ ref: focusRef })}
             style={{ backgroundColor: "#F7F7F7" }}

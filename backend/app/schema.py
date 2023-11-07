@@ -151,6 +151,7 @@ class SecDocumentMetadata(BaseModel):
     period_of_report_date: Optional[datetime]
     filed_as_of_date: Optional[datetime]
     date_as_of_change: Optional[datetime]
+    name: Optional[str]
 
 
 DocumentMetadataMap = Dict[Union[DocumentMetadataKeysEnum, str], Any]

@@ -122,55 +122,10 @@ export const TitleAndDropdown = () => {
                 </span>
               </div>
             </div>
-            <div className="m-1 flex h-[41px] w-56 items-center bg-[#F7F7F7]">
-              <div className="flex h-[41px] w-[30px] items-center justify-center bg-[#F7F7F7] pl-3">
-                <CgFileDocument size={30} />
-              </div>
-              <div className="flex-grow">
-                <Select
-                  openMenuOnFocus
-                  ref={documentTypeFocusRef}
-                  options={availableDocumentTypes}
-                  onChange={selectDocumentType}
-                  getOptionLabel={(option: SelectOption) => option.label}
-                  getOptionValue={(option: SelectOption) => option.value}
-                  value={selectedDocumentType}
-                  placeholder="Select Document Type"
-                  components={{
-                    IndicatorSeparator: () => null,
-                    DropdownIndicator: () => null,
-                  }}
-                  styles={customReactSelectStyles}
-                />
-              </div>
-            </div>
-            <div className="m-1 flex h-[41px] w-48 items-center rounded-e bg-[#F7F7F7]">
-              <div className="flex h-[41px] w-[30px] items-center justify-center bg-[#F7F7F7] pl-3">
-                <AiTwotoneCalendar size={30} />
-              </div>
-              <div className="flex-grow">
-                <Select
-                  openMenuOnFocus
-                  ref={yearFocusRef}
-                  options={sortedAvailableYears || []}
-                  getOptionLabel={(option: SelectOption) => option.label}
-                  getOptionValue={(option: SelectOption) => option.value}
-                  onChange={setSelectedYear}
-                  value={selectedYear}
-                  placeholder="Select Year"
-                  components={{
-                    IndicatorSeparator: () => null,
-                    DropdownIndicator: () => null,
-                  }}
-                  styles={customReactSelectStyles}
-                />
-              </div>
-            </div>
             <div className="relative">
               <button
                 className="m-4 rounded border bg-llama-indigo px-8 py-2 text-white hover:bg-[#3B3775] disabled:bg-gray-30"
                 onClick={handleAddDocument}
-                disabled={!isDocumentSelectionEnabled || !selectedYear}
               >
                 Add
               </button>

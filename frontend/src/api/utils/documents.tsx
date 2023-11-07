@@ -20,7 +20,7 @@ export const fromBackendDocumentToFrontend = (
       id: backendDoc.id,
       url: backendDoc.url,
       ticker: backendDoc.metadata_map.sec_document.company_ticker,
-      fullName: backendDoc.metadata_map.sec_document.company_name,
+      fullName: backendDoc.metadata_map.name || backendDoc.metadata_map.sec_document.company_name,
       year: String(backendDoc.metadata_map.sec_document.year),
       docType: frontendDocType,
       color: documentColors[colorIndex],

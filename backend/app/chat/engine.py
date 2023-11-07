@@ -18,9 +18,8 @@ from datetime import timedelta
 from cachetools import cached, TTLCache
 from llama_index.readers.file.docs_reader import PDFReader
 from llama_index.schema import Document as LlamaIndexDocument
-from llama_index.agent import ReActAgent
-# from llama_index.llms import ChatMessage, OpenAI
-from llama_index.llms import ChatMessage, HuggingFaceLLM
+from llama_index.agent import OpenAIAgent
+from llama_index.llms import ChatMessage, OpenAI
 from llama_index.embeddings.openai import (
     OpenAIEmbedding,
     OpenAIEmbeddingMode,
@@ -232,53 +231,23 @@ def get_tool_service_context(
     callback_handlers: List[BaseCallbackHandler],
 ) -> ServiceContext:
     
-    system_prompt = """<|SYSTEM|># StableLM Tuned (Alpha version)
-    - StableLM is a helpful and harmless open-source AI language model developed by StabilityAI.
-    - StableLM is excited to be able to help the user, but will refuse to do anything that could be considered harmful to the user.
-    - StableLM is more than just an information source, StableLM is also able to write poetry, short stories, and make jokes.
-    - StableLM will refuse to participate in anything that could harm a human.
-    """
+    # system_prompt = """<|SYSTEM|># StableLM Tuned (Alpha version)
+    # - StableLM is a helpful and harmless open-source AI language model developed by StabilityAI.
+    # - StableLM is excited to be able to help the user, but will refuse to do anything that could be considered harmful to the user.
+    # - StableLM is more than just an information source, StableLM is also able to write poetry, short stories, and make jokes.
+    # - StableLM will refuse to participate in anything that could harm a human.
+    # """
 
-    # This will wrap the default prompts that are internal to llama-index
-    query_wrapper_prompt = PromptTemplate("<|USER|>{query_str}<|ASSISTANT|>")
+    # # This will wrap the default prompts that are internal to llama-index
+    # query_wrapper_prompt = PromptTemplate("<|USER|>{query_str}<|ASSISTANT|>")
 
-    llm = HuggingFaceLLM(
-        context_window=4096,
-        max_new_tokens=256,
-        generate_kwargs={"temperature": 0.7, "do_sample": True},
-        system_prompt=system_prompt,
-        query_wrapper_prompt=query_wrapper_prompt,
-        tokenizer_name="StabilityAI/stablelm-tuned-alpha-3b",
-        model_name="StabilityAI/stablelm-tuned-alpha-3b",
-        device_map="auto",
-        stopping_ids=[50278, 50279, 50277, 1, 0],
-        tokenizer_kwargs={"max_length": 4096},
-        # offload="offload",
-        # uncomment this if using CUDA to reduce memory usage
-        model_kwargs={"torch_dtype": torch.float16}
-        
+    llm = OpenAI(
+        temperature=0,
+        model="gpt-3.5-turbo-0613",
+        streaming=False,
+        api_key=settings.OPENAI_API_KEY,
+        additional_kwargs={"api_key": settings.OPENAI_API_KEY},
     )
-
-    # llm = HuggingFaceLLM(
-    #     model_name="HuggingFaceH4/zephyr-7b-beta",
-    #     tokenizer_name="HuggingFaceH4/zephyr-7b-beta",
-    #     query_wrapper_prompt=PromptTemplate("<|system|>\n</s>\n<|user|>\n{query_str}</s>\n<|assistant|>\n"),
-    #     context_window=5000,
-    #     max_new_tokens=512,
-    #     # model_kwargs={"quantization_config": quantization_config},
-    #     # tokenizer_kwargs={},
-    #     generate_kwargs={"temperature": 0.5, "top_k": 50, "top_p": 0.95},
-    #     messages_to_prompt=messages_to_prompt,
-    #     device_map="auto",
-    # )
-
-    # llm = OpenAI(
-    #     temperature=0,
-    #     model="gpt-3.5-turbo-0613",
-    #     streaming=False,
-    #     api_key=settings.OPENAI_API_KEY,
-    #     additional_kwargs={"api_key": settings.OPENAI_API_KEY},
-    # )
 
     callback_manager = CallbackManager(callback_handlers)
 
@@ -298,8 +267,7 @@ def get_tool_service_context(
         chunk_size=1024,
         callback_manager=callback_manager,
         llm=llm,
-        # embed_model=embedding_model,
-        embed_model="local:BAAI/bge-small-en-v1.5",
+        embed_model=embedding_model,
         node_parser=node_parser,
     )
     return service_context
@@ -308,7 +276,7 @@ def get_tool_service_context(
 async def get_chat_engine(
     callback_handler: BaseCallbackHandler,
     conversation: ConversationSchema,
-) -> ReActAgent:
+) -> OpenAIAgent:
     service_context = get_tool_service_context([callback_handler])
     s3_fs = get_s3_fs()
     doc_id_to_index = await build_doc_id_to_index_map(
@@ -376,52 +344,23 @@ Any questions about company-related financials or other metrics should be asked 
         ),
     ]
     
-    system_prompt = """<|SYSTEM|># StableLM Tuned (Alpha version)
-    - StableLM is a helpful and harmless open-source AI language model developed by StabilityAI.
-    - StableLM is excited to be able to help the user, but will refuse to do anything that could be considered harmful to the user.
-    - StableLM is more than just an information source, StableLM is also able to write poetry, short stories, and make jokes.
-    - StableLM will refuse to participate in anything that could harm a human.
-    """
+    # system_prompt = """<|SYSTEM|># StableLM Tuned (Alpha version)
+    # - StableLM is a helpful and harmless open-source AI language model developed by StabilityAI.
+    # - StableLM is excited to be able to help the user, but will refuse to do anything that could be considered harmful to the user.
+    # - StableLM is more than just an information source, StableLM is also able to write poetry, short stories, and make jokes.
+    # - StableLM will refuse to participate in anything that could harm a human.
+    # """
 
-    # This will wrap the default prompts that are internal to llama-index
-    query_wrapper_prompt = PromptTemplate("<|USER|>{query_str}<|ASSISTANT|>")
-
-    chat_llm = HuggingFaceLLM(
-        context_window=4096,
-        max_new_tokens=256,
-        generate_kwargs={"temperature": 0.7, "do_sample": True},
-        system_prompt=system_prompt,
-        query_wrapper_prompt=query_wrapper_prompt,
-        tokenizer_name="StabilityAI/stablelm-tuned-alpha-3b",
-        model_name="StabilityAI/stablelm-tuned-alpha-3b",
-        device_map="auto",
-        stopping_ids=[50278, 50279, 50277, 1, 0],
-        tokenizer_kwargs={"max_length": 4096},
-        # offload="offload",
-        # uncomment this if using CUDA to reduce memory usage
-        model_kwargs={"torch_dtype": torch.float16}
-    )
-
-    # chat_llm = HuggingFaceLLM(
-    #     model_name="HuggingFaceH4/zephyr-7b-beta",
-    #     tokenizer_name="HuggingFaceH4/zephyr-7b-beta",
-    #     query_wrapper_prompt=PromptTemplate("<|system|>\n</s>\n<|user|>\n{query_str}</s>\n<|assistant|>\n"),
-    #     context_window=5000,
-    #     max_new_tokens=512,
-    #     # model_kwargs={"quantization_config": quantization_config},
-    #     # tokenizer_kwargs={},
-    #     generate_kwargs={"temperature": 0.5, "top_k": 50, "top_p": 0.95},
-    #     messages_to_prompt=messages_to_prompt,
-    #     device_map="auto",
-    # )
+    # # This will wrap the default prompts that are internal to llama-index
+    # query_wrapper_prompt = PromptTemplate("<|USER|>{query_str}<|ASSISTANT|>")
     
-    # chat_llm = OpenAI(
-    #     temperature=0,
-    #     model="gpt-3.5-turbo-0613",
-    #     streaming=True,
-    #     api_key=settings.OPENAI_API_KEY,
-    #     additional_kwargs={"api_key": settings.OPENAI_API_KEY},
-    # )
+    chat_llm = OpenAI(
+        temperature=0,
+        model="gpt-3.5-turbo-0613",
+        streaming=True,
+        api_key=settings.OPENAI_API_KEY,
+        additional_kwargs={"api_key": settings.OPENAI_API_KEY},
+    )
     
     chat_messages: List[MessageSchema] = conversation.messages
     chat_history = get_chat_history(chat_messages)
@@ -435,7 +374,7 @@ Any questions about company-related financials or other metrics should be asked 
         doc_titles = "No documents selected."
 
     curr_date = datetime.utcnow().strftime("%Y-%m-%d")
-    chat_engine = ReActAgent.from_tools(
+    chat_engine = OpenAIAgent.from_tools(
         tools=top_level_sub_tools,
         llm=chat_llm,
         chat_history=chat_history,

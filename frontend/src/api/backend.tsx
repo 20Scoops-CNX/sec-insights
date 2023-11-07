@@ -91,9 +91,6 @@ class BackendClient {
     const newData = [];
     for (let i = 0; i < data.length; i++) {
       const element = data[i];
-      // if (element) {
-      //   element.url = "https://mock-data-20scoops.s3.ap-southeast-1.amazonaws.com/APznzaae_PHPfTErTBgZWvRwZsEkVhu5EEW445RNiEIFiQNNzhHfPD5UWHsEIzfPFaQG4GQxvqeLlbALtsCuA0CIwe1RXUIq8u0Bvq6aa-FYhHNxAWnTez0B2VsRaE33JblvzQGW47XITwA5N-PE4OZpCJMDThoBmKJof6rq3vVPIdSwNQrNCKcNDdXKqcKqy0TES3CVioBuUmBPOhnt6kqV9eK3UL1lLxjAUHmirXu3b42h.pdf";
-      // }
       if (element?.metadata_map) {
         element.metadata_map.sec_document = {
           year: 2021,
