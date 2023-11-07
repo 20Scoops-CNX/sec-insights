@@ -129,7 +129,7 @@ class DocumentMetadataKeysEnum(str, Enum):
 
 class SecDocumentTypeEnum(str, Enum):
     """
-    Enum for the type of sec document
+    Enum for the type of document
     """
 
     TEN_K = "10-K"
@@ -138,7 +138,7 @@ class SecDocumentTypeEnum(str, Enum):
 
 class SecDocumentMetadata(BaseModel):
     """
-    Metadata for a document that is a sec document
+    Metadata for a document that is the real-estate document
     """
 
     company_name: str

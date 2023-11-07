@@ -54,33 +54,11 @@ from app.chat.tools import get_api_query_engine_tool
 from app.chat.utils import build_title_for_document
 from app.chat.pg_vector import get_vector_store_singleton
 from app.chat.qa_response_synth import get_custom_response_synth
-import torch
-from llama_index.prompts import PromptTemplate
-
 logger = logging.getLogger(__name__)
 
 
 logger.info("Applying nested asyncio patch")
 nest_asyncio.apply()
-
-def messages_to_prompt(messages):
-  prompt = ""
-  for message in messages:
-    if message.role == 'system':
-      prompt += f"<|system|>\n{message.content}</s>\n"
-    elif message.role == 'user':
-      prompt += f"<|user|>\n{message.content}</s>\n"
-    elif message.role == 'assistant':
-      prompt += f"<|assistant|>\n{message.content}</s>\n"
-
-  # ensure we start with a system prompt, insert blank if needed
-  if not prompt.startswith("<|system|>\n"):
-    prompt = "<|system|>\n</s>\n" + prompt
-
-  # add final assistant prompt
-  prompt = prompt + "<|assistant|>\n"
-
-  return prompt
 
 def get_s3_fs() -> AsyncFileSystem:
     s3 = s3fs.S3FileSystem(
@@ -122,8 +100,8 @@ def build_description_for_document(document: DocumentSchema) -> str:
             if sec_metadata.quarter
             else str(sec_metadata.year)
         )
-        return f"A SEC {sec_metadata.doc_type.value} filing describing the financials of {sec_metadata.company_name} ({sec_metadata.company_ticker}) for the {time_period} time period."
-    return "A document containing useful information that the user pre-selected to discuss with the assistant."
+        return f"A real estate {sec_metadata.doc_type.value} document describing the information of {sec_metadata.company_name} ({sec_metadata.company_ticker}) for the {time_period} time period."
+    return "A real estate document containing useful information that the user pre-selected to discuss with the assistant."
 
 
 def index_to_query_engine(doc_id: str, index: VectorStoreIndex) -> BaseQueryEngine:
@@ -230,17 +208,6 @@ def get_chat_history(
 def get_tool_service_context(
     callback_handlers: List[BaseCallbackHandler],
 ) -> ServiceContext:
-    
-    # system_prompt = """<|SYSTEM|># StableLM Tuned (Alpha version)
-    # - StableLM is a helpful and harmless open-source AI language model developed by StabilityAI.
-    # - StableLM is excited to be able to help the user, but will refuse to do anything that could be considered harmful to the user.
-    # - StableLM is more than just an information source, StableLM is also able to write poetry, short stories, and make jokes.
-    # - StableLM will refuse to participate in anything that could harm a human.
-    # """
-
-    # # This will wrap the default prompts that are internal to llama-index
-    # query_wrapper_prompt = PromptTemplate("<|USER|>{query_str}<|ASSISTANT|>")
-
     llm = OpenAI(
         temperature=0,
         model="gpt-3.5-turbo-0613",
@@ -248,15 +215,12 @@ def get_tool_service_context(
         api_key=settings.OPENAI_API_KEY,
         additional_kwargs={"api_key": settings.OPENAI_API_KEY},
     )
-
     callback_manager = CallbackManager(callback_handlers)
-
     embedding_model = OpenAIEmbedding(
         mode=OpenAIEmbeddingMode.SIMILARITY_MODE,
         model_type=OpenAIEmbeddingModelType.TEXT_EMBED_ADA_002,
         api_key=settings.OPENAI_API_KEY,
     )
-
     # Use a smaller chunk size to retrieve more granular results
     node_parser = SimpleNodeParser.from_defaults(
         chunk_size=NODE_PARSER_CHUNK_SIZE,
@@ -264,7 +228,6 @@ def get_tool_service_context(
         callback_manager=callback_manager,
     )
     service_context = ServiceContext.from_defaults(
-        chunk_size=1024,
         callback_manager=callback_manager,
         llm=llm,
         embed_model=embedding_model,
@@ -327,7 +290,7 @@ async def get_chat_engine(
             metadata=ToolMetadata(
                 name="qualitative_question_engine",
                 description="""
-A query engine that can answer qualitative questions about a set of SEC financial documents that the user pre-selected for the conversation.
+A query engine that can answer qualitative questions about a set of real estate documents that the user pre-selected for the conversation.
 Any questions about company-related headwinds, tailwinds, risks, sentiments, or administrative information should be asked here.
 """.strip(),
             ),
@@ -337,23 +300,13 @@ Any questions about company-related headwinds, tailwinds, risks, sentiments, or 
             metadata=ToolMetadata(
                 name="quantitative_question_engine",
                 description="""
-A query engine that can answer quantitative questions about a set of SEC financial documents that the user pre-selected for the conversation.
-Any questions about company-related financials or other metrics should be asked here.
+A query engine that can answer quantitative questions about a set of documents that the user pre-selected for the conversation.
+Any questions about company-related real estate or other metrics should be asked here.
 """.strip(),
             ),
         ),
     ]
-    
-    # system_prompt = """<|SYSTEM|># StableLM Tuned (Alpha version)
-    # - StableLM is a helpful and harmless open-source AI language model developed by StabilityAI.
-    # - StableLM is excited to be able to help the user, but will refuse to do anything that could be considered harmful to the user.
-    # - StableLM is more than just an information source, StableLM is also able to write poetry, short stories, and make jokes.
-    # - StableLM will refuse to participate in anything that could harm a human.
-    # """
 
-    # # This will wrap the default prompts that are internal to llama-index
-    # query_wrapper_prompt = PromptTemplate("<|USER|>{query_str}<|ASSISTANT|>")
-    
     chat_llm = OpenAI(
         temperature=0,
         model="gpt-3.5-turbo-0613",
@@ -361,7 +314,6 @@ Any questions about company-related financials or other metrics should be asked 
         api_key=settings.OPENAI_API_KEY,
         additional_kwargs={"api_key": settings.OPENAI_API_KEY},
     )
-    
     chat_messages: List[MessageSchema] = conversation.messages
     chat_history = get_chat_history(chat_messages)
     logger.debug("Chat history: %s", chat_history)
