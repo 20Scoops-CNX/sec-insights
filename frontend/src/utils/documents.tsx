@@ -38,7 +38,7 @@ export function findDocumentById(
   id: string,
   documents: SecDocument[]
 ): SecDocument | null {
-  return documents.find((val) => val.id === id) || null;
+  return documents.find((val) => val.fullName === id) || null;
 }
 
 export function sortDocuments(selectedDocuments: SecDocument[]): SecDocument[] {

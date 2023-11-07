@@ -34,9 +34,9 @@ const CitationDisplay: React.FC<CitationDisplayProps> = ({ citation }) => {
         <div className="mr-1 text-xs font-bold text-black">
           {citation.ticker}{" "}
         </div>
-        <div className="mr-2 text-xs font-bold text-black">
+        {/* <div className="mr-2 text-xs font-bold text-black">
           ({citation.displayDate})
-        </div>
+        </div> */}
         <div className="text-[10px]">p. {citation.pageNumber}</div>
       </div>
       <p className="line-clamp-2 text-[10px] font-light leading-3">
@@ -363,7 +363,7 @@ export const RenderConversations: React.FC<IRenderConversation> = ({
               <HiOutlineChatAlt2 size={40} />
             </div>
             <div className="mb-2 w-3/4 text-center text-lg font-bold">
-              Ask SEC Insights questions about the documents you&apos;ve
+              Ask questions about the documents you&apos;ve
               selected, such as:
             </div>
             <div className="m-auto flex w-full flex-wrap justify-center">

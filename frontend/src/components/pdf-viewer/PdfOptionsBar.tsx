@@ -79,10 +79,10 @@ export const PDFOptionsBar: React.FC<PDFOptionsBarProps> = ({
           } `}
         >
           <div className="text font-bold">{file.ticker}</div>
-          <div className="ml-2">
+          {/* <div className="ml-2">
             {" "}
             {file.year} {file.quarter && `Q${file.quarter}`}
-          </div>
+          </div> */}
         </div>
       </div>
       <div className="flex flex-grow items-center justify-center border-l border-l-gray-30">

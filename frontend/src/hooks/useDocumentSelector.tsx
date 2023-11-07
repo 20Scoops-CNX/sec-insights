@@ -58,7 +58,7 @@ export const useDocumentSelector = () => {
         if (prevDocs.find((doc) => doc.fullName === selectedTicker.fullName)) {
           return prevDocs;
         }
-        const newDoc =  availableDocuments.find((val) => val.fullName === selectedTicker.fullName) || null;
+        const newDoc = findDocumentById(selectedTicker.fullName, availableDocuments);
         return newDoc ? [newDoc, ...prevDocs] : prevDocs;
       });
       setSelectedTicker(null);
