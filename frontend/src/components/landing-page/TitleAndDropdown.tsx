@@ -144,13 +144,13 @@ export const TitleAndDropdown = () => {
                 )}
               >
                 <div className="w-64 text-left">
-                  <span className="font-bold">{doc.ticker}</span> -{" "}
+                  {/* <span className="font-bold">{doc.ticker}</span> -{" "} */}
                   {doc.fullName}
                 </div>
-                <div className="w-24 text-left">
+                {/* <div className="w-24 text-left">
                   {doc.year} {doc.quarter && `Q${doc.quarter}`}
                 </div>
-                <div>{doc.docType}</div>
+                <div>{doc.docType}</div> */}
                 <button
                   className="mr-4 group-hover:text-[#FF0000]"
                   onClick={() => handleRemoveDocument(index)}
