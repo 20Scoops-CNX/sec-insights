@@ -80,21 +80,7 @@ export const TitleAndDropdown = () => {
           </button>
         </a>
       </div>
-      <div className="mt-28 flex flex-col items-center">
-        <div className="w-4/5 text-center text-4xl">
-          Empower your organization&apos;s Business Intelligence with{" "}
-          <span className="font-bold">SEC Insights </span>
-        </div>
-        <div className="mt-4 flex items-center justify-center">
-          <div className="w-3/5 text-center font-nunito">
-            Effortlessly analyze multifaceted financial documents such as 10-Ks
-            and 10-Qs.
-          </div>
-        </div>
-        <div className="mt-4 flex items-center justify-center">
-          <GitHubButton href="https://github.com/run-llama/sec-insights">Open-Sourced on Github</GitHubButton>
-        </div>
-      </div>
+      <div className="mt-28 flex flex-col items-center"/>
       {isMobile ? (
         <div className="mt-12 flex h-1/5 w-11/12 rounded border p-4 text-center">
           <div className="text-xl font-bold">
@@ -108,7 +94,7 @@ export const TitleAndDropdown = () => {
             explore
           </div>
           <div className="h-1/8 flex w-full flex-wrap items-center justify-center font-nunito">
-            <div className="m-1 flex w-96 items-center">
+            <div className="m-1 flex w-3/4 items-center">
               <DocumentSelectCombobox
                 selectedItem={selectedTicker}
                 setSelectedItem={selectTicker}
@@ -126,6 +112,7 @@ export const TitleAndDropdown = () => {
               <button
                 className="m-4 rounded border bg-llama-indigo px-8 py-2 text-white hover:bg-[#3B3775] disabled:bg-gray-30"
                 onClick={handleAddDocument}
+                disabled={selectedTicker === null}
               >
                 Add
               </button>

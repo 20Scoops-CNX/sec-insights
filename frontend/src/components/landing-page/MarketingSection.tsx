@@ -73,7 +73,7 @@ export const MarketingSection = () => {
         </div>
       </div>
       <div className="landing-page-gradient-3 mx-auto flex h-max min-h-[500px] w-4/5 flex-col items-center justify-center sm:flex-row">
-        <div className="w-full text-center text-center sm:w-1/2 sm:text-left">
+        <div className="w-full text-center sm:w-1/2 sm:text-left">
           <div className="mx-auto w-4/5 text-3xl font-bold sm:w-4/5 ">
             Extract meaningful insight from inquiries across multiple documents
           </div>
