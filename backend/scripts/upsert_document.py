@@ -6,7 +6,7 @@ import asyncio
 
 async def upsert_single_document(doc_url: str, name: str):
     """
-    Upserts a single SEC document into the database using its URL.
+    Upserts a single document into the database using its URL.
     """
     if not doc_url or not doc_url.startswith('http'):
         print("DOC_URL must be an http(s) based url value")
