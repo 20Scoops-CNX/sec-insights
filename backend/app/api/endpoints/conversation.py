@@ -81,6 +81,7 @@ async def message_conversation(
     be SUCCESS. If there was an error in processing the message, the final status will be ERROR.
     """
     conversation = await crud.fetch_conversation_with_messages(db, str(conversation_id))
+    print("INITIAL CONVERSATION", conversation.documents)
     if conversation is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
