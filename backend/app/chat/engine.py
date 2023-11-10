@@ -305,6 +305,7 @@ Any questions about company-related headwinds, tailwinds, risks, sentiments, or 
 #             ),
 #         ),
     ]
+    top_level_sub_tools = vector_query_engine_tools
     print("ENTER THE ENGINE")
     chat_llm = OpenAI(
         temperature=0,
