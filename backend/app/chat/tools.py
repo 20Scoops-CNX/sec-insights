@@ -88,8 +88,8 @@ def get_tool_metadata_for_document(doc: DocumentSchema) -> ToolMetadata:
 
 
 def get_polygion_io_sec_tool(document: DocumentSchema) -> FunctionTool:
-    sec_metadata = SecDocumentMetadata.parse_obj(
-        document.metadata_map[DocumentMetadataKeysEnum.SEC_DOCUMENT]
+    metadata = SecDocumentMetadata.parse_obj(
+        document.metadata_map[DocumentMetadataKeysEnum.NAME]
     )
     tool_metadata = get_tool_metadata_for_document(document)
 
@@ -104,8 +104,8 @@ def get_polygion_io_sec_tool(document: DocumentSchema) -> FunctionTool:
             )
             client = cast(AsyncReferenceClient, client)
             response_dict = await client.get_stock_financials_vx(
-                ticker=sec_metadata.company_ticker,
-                period_of_report_date=str(sec_metadata.period_of_report_date.date()),
+                ticker=metadata.company_ticker,
+                period_of_report_date=str(metadata.period_of_report_date.date()),
                 limit=100,  # max limit is 100
             )
             stock_financials = []

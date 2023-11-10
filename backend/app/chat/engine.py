@@ -55,7 +55,7 @@ from app.chat.utils import build_title_for_document
 from app.chat.pg_vector import get_vector_store_singleton
 from app.chat.qa_response_synth import get_custom_response_synth
 logger = logging.getLogger(__name__)
-
+from datetime import date
 
 logger.info("Applying nested asyncio patch")
 nest_asyncio.apply()
@@ -91,16 +91,10 @@ def fetch_and_read_document(
 
 
 def build_description_for_document(document: DocumentSchema) -> str:
-    if DocumentMetadataKeysEnum.SEC_DOCUMENT in document.metadata_map:
-        sec_metadata = SecDocumentMetadata.parse_obj(
-            document.metadata_map[DocumentMetadataKeysEnum.SEC_DOCUMENT]
-        )
-        time_period = (
-            f"{sec_metadata.year} Q{sec_metadata.quarter}"
-            if sec_metadata.quarter
-            else str(sec_metadata.year)
-        )
-        return f"A real estate {sec_metadata.doc_type.value} document describing the information of {sec_metadata.company_name} ({sec_metadata.company_ticker}) for the {time_period} time period."
+    # print(document.metadata_map[DocumentMetadataKeysEnum.NAME])
+    # if DocumentMetadataKeysEnum.NAME in document.metadata_map:
+    #     sec_metadata = document.metadata_map
+    #     return f"A real estate {document.metadata_map} document describing the information."
     return "A real estate document containing useful information that the user pre-selected to discuss with the assistant."
 
 
@@ -185,6 +179,9 @@ def get_chat_history(
     sorted by created_at.
     """
     # pre-process chat messages
+    # TODO: disable historty used and reduce cpu usage purpose
+    # TODO: To prevent failure answer need to clear unuseful table much as we can
+    return []
     chat_messages = [
         m
         for m in chat_messages
@@ -248,7 +245,8 @@ async def get_chat_engine(
     id_to_doc: Dict[str, DocumentSchema] = {
         str(doc.id): doc for doc in conversation.documents
     }
-
+    print("USE ENGINE", id_to_doc)
+# Question generate engine
     vector_query_engine_tools = [
         QueryEngineTool(
             query_engine=index_to_query_engine(doc_id, index),
@@ -259,30 +257,31 @@ async def get_chat_engine(
         )
         for doc_id, index in doc_id_to_index.items()
     ]
+    print("USE ENGINE", doc_id_to_index.items())
 
     response_synth = get_custom_response_synth(service_context, conversation.documents)
-
+    print("response synte",response_synth)
     qualitative_question_engine = SubQuestionQueryEngine.from_defaults(
         query_engine_tools=vector_query_engine_tools,
         service_context=service_context,
         response_synthesizer=response_synth,
-        verbose=settings.VERBOSE,
+        verbose=True,
         use_async=True,
     )
+    
+    # api_query_engine_tools = [
+    #     get_api_query_engine_tool(doc, service_context)
+    #     for doc in conversation.documents
+    #     if DocumentMetadataKeysEnum.SEC_DOCUMENT in doc.metadata_map
+    # ]
 
-    api_query_engine_tools = [
-        get_api_query_engine_tool(doc, service_context)
-        for doc in conversation.documents
-        if DocumentMetadataKeysEnum.SEC_DOCUMENT in doc.metadata_map
-    ]
-
-    quantitative_question_engine = SubQuestionQueryEngine.from_defaults(
-        query_engine_tools=api_query_engine_tools,
-        service_context=service_context,
-        response_synthesizer=response_synth,
-        verbose=settings.VERBOSE,
-        use_async=True,
-    )
+    # quantitative_question_engine = SubQuestionQueryEngine.from_defaults(
+    #     query_engine_tools=api_query_engine_tools,
+    #     service_context=service_context,
+    #     response_synthesizer=response_synth,
+    #     verbose=settings.VERBOSE,
+    #     use_async=True,
+    # )
 
     top_level_sub_tools = [
         QueryEngineTool(
@@ -295,18 +294,19 @@ Any questions about company-related headwinds, tailwinds, risks, sentiments, or 
 """.strip(),
             ),
         ),
-        QueryEngineTool(
-            query_engine=quantitative_question_engine,
-            metadata=ToolMetadata(
-                name="quantitative_question_engine",
-                description="""
-A query engine that can answer quantitative questions about a set of documents that the user pre-selected for the conversation.
-Any questions about company-related real estate or other metrics should be asked here.
-""".strip(),
-            ),
-        ),
+#         QueryEngineTool(
+#             query_engine=quantitative_question_engine,
+#             metadata=ToolMetadata(
+#                 name="quantitative_question_engine",
+#                 description="""
+# A query engine that can answer quantitative questions about a set of documents that the user pre-selected for the conversation.
+# Any questions about company-related real estate or other metrics should be asked here.
+# """.strip(),
+#             ),
+#         ),
     ]
-
+    top_level_sub_tools = vector_query_engine_tools
+    print("ENTER THE ENGINE")
     chat_llm = OpenAI(
         temperature=0,
         model="gpt-3.5-turbo-0613",
@@ -317,14 +317,15 @@ Any questions about company-related real estate or other metrics should be asked
     chat_messages: List[MessageSchema] = conversation.messages
     chat_history = get_chat_history(chat_messages)
     logger.debug("Chat history: %s", chat_history)
-
+    print("CONVER CHECK DOCUMENT", chat_history)
+    print("History", chat_history)
     if conversation.documents:
         doc_titles = "\n".join(
-            "- " + build_title_for_document(doc) for doc in conversation.documents
+            "- " + f"{doc.metadata_map.name}" for doc in conversation.documents
         )
     else:
         doc_titles = "No documents selected."
-
+    print("Doc title", doc_titles)
     curr_date = datetime.utcnow().strftime("%Y-%m-%d")
     chat_engine = OpenAIAgent.from_tools(
         tools=top_level_sub_tools,
@@ -333,7 +334,7 @@ Any questions about company-related real estate or other metrics should be asked
         verbose=settings.VERBOSE,
         system_prompt=SYSTEM_MESSAGE.format(doc_titles=doc_titles, curr_date=curr_date),
         callback_manager=service_context.callback_manager,
-        max_function_calls=3,
+        max_function_calls=100
     )
-
+    
     return chat_engine

@@ -44,7 +44,7 @@ async def upsert_document(doc_dir: str, stock: Stock, filing: Filing, url_base: 
         date_as_of_change=filing.date_as_of_change,
     )
     metadata_map: DocumentMetadataMap = {
-        DocumentMetadataKeysEnum.SEC_DOCUMENT: jsonable_encoder(
+        DocumentMetadataKeysEnum.NAME: jsonable_encoder(
             sec_doc_metadata.dict(exclude_none=True)
         )
     }
