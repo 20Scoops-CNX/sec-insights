@@ -95,7 +95,7 @@ def build_description_for_document(document: DocumentSchema) -> str:
     # if DocumentMetadataKeysEnum.NAME in document.metadata_map:
     #     sec_metadata = document.metadata_map
     #     return f"A real estate {document.metadata_map} document describing the information."
-    return "A real estate document containing useful information that the user pre-selected to discuss with the assistant."
+    return f"A document with name {document.metadata_map.name}, containing useful information."
 
 
 def index_to_query_engine(doc_id: str, index: VectorStoreIndex) -> BaseQueryEngine:
@@ -251,7 +251,7 @@ async def get_chat_engine(
         QueryEngineTool(
             query_engine=index_to_query_engine(doc_id, index),
             metadata=ToolMetadata(
-                name=doc_id,
+                name=id_to_doc[doc_id].metadata_map.name,
                 description=build_description_for_document(id_to_doc[doc_id]),
             ),
         )
@@ -289,8 +289,7 @@ async def get_chat_engine(
             metadata=ToolMetadata(
                 name="qualitative_question_engine",
                 description="""
-A query engine that can answer qualitative questions about a set of real estate documents that the user pre-selected for the conversation.
-Any questions about company-related headwinds, tailwinds, risks, sentiments, or administrative information should be asked here.
+A query engine that can answer qualitative questions about a set of documents.
 """.strip(),
             ),
         ),
@@ -305,7 +304,7 @@ Any questions about company-related headwinds, tailwinds, risks, sentiments, or 
 #             ),
 #         ),
     ]
-    top_level_sub_tools = vector_query_engine_tools
+    
     print("ENTER THE ENGINE")
     chat_llm = OpenAI(
         temperature=0,
