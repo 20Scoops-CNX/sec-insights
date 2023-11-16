@@ -19,4 +19,4 @@ def build_title_for_document(document: DocumentSchema) -> str:
     #     if sec_metadata.quarter is not None
     #     else str(sec_metadata.year)
     # )
-    return f""
+    return f"{document.metadata_map.name}"
