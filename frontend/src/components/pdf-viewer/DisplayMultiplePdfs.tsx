@@ -33,7 +33,7 @@ export const DisplayMultiplePdfs: React.FC<DisplayMultiplePdfsProps> = ({
             <div key={index}>
               <button
                 onClick={() => handlePdfFocus(file)}
-                className={`group flex h-[80px] w-[80px] items-end  justify-start border px-2 py-1 font-nunito text-sm font-bold ${
+                className={`group flex h-[80px] w-[80px] items-center justify-start border px-2 py-1 font-nunito text-sm font-bold ${
                   isActivePdf(file)
                     ? "border-l-0 bg-gray-pdf"
                     : "bg-white font-light text-gray-60 "
@@ -49,9 +49,9 @@ export const DisplayMultiplePdfs: React.FC<DisplayMultiplePdfsProps> = ({
                   }`}
                 >
                   <div>{file.ticker}</div>
-                  <div className="text-left">
+                  {/* <div className="text-left">
                     {file.year} {file.quarter && `Q${file.quarter}`}
-                  </div>
+                  </div> */}
                 </div>
               </button>
             </div>

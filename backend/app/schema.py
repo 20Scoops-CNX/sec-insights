@@ -51,7 +51,11 @@ class Citation(BaseMetadataObject):
     @classmethod
     def from_node(cls, node_w_score: NodeWithScore) -> "Citation":
         node: BaseNode = node_w_score.node
-        page_number = int(node.source_node.metadata["page_label"])
+        page_number = 0
+        if(len(node.source_node.metadata["page_label"].split(' ')) > 1):
+            page_number = int(node.source_node.metadata["page_label"].split(' ')[1])
+        else:
+            page_number = int(node.source_node.metadata["page_label"])
         document_id = node.source_node.metadata[DB_DOC_ID_KEY]
         return cls(
             document_id=document_id,
@@ -124,12 +128,12 @@ class DocumentMetadataKeysEnum(str, Enum):
     Enum for the keys of the metadata map for a document
     """
 
-    SEC_DOCUMENT = "sec_document"
+    NAME = "name"
 
 
 class SecDocumentTypeEnum(str, Enum):
     """
-    Enum for the type of sec document
+    Enum for the type of document
     """
 
     TEN_K = "10-K"
@@ -138,22 +142,15 @@ class SecDocumentTypeEnum(str, Enum):
 
 class SecDocumentMetadata(BaseModel):
     """
-    Metadata for a document that is a sec document
+    Metadata for a document that is the real-estate document
     """
-
-    company_name: str
-    company_ticker: str
-    doc_type: SecDocumentTypeEnum
-    year: int
-    quarter: Optional[int]
-    accession_number: Optional[str]
-    cik: Optional[str]
-    period_of_report_date: Optional[datetime]
-    filed_as_of_date: Optional[datetime]
-    date_as_of_change: Optional[datetime]
+    name: Optional[str]
 
 
-DocumentMetadataMap = Dict[Union[DocumentMetadataKeysEnum, str], Any]
+# DocumentMetadataMap = Dict[Union[DocumentMetadataKeysEnum, str], Any]
+
+class DocumentMetadataMap(Base):
+    name: Optional[str]
 
 
 class Document(Base):

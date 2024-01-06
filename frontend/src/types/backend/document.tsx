@@ -13,6 +13,7 @@ export interface BackendDocument {
 
 export interface BackendMetadataMap {
   sec_document: BackendSecDocument;
+  name?: string;
 }
 
 export interface BackendSecDocument {

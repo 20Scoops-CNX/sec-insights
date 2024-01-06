@@ -4,14 +4,14 @@ from app.db.session import SessionLocal
 from app.api import crud
 import asyncio
 
-async def upsert_single_document(doc_url: str):
+async def upsert_single_document(doc_url: str, name: str):
     """
-    Upserts a single SEC document into the database using its URL.
+    Upserts a single document into the database using its URL.
     """
     if not doc_url or not doc_url.startswith('http'):
         print("DOC_URL must be an http(s) based url value")
         return
-    metadata_map = {}
+    metadata_map = { "name": name }
     doc = Document(url=doc_url, metadata_map=metadata_map)
 
     async with SessionLocal() as db:
@@ -19,12 +19,12 @@ async def upsert_single_document(doc_url: str):
         print(f"Upserted document. Database ID:\n{document.id}")
 
 
-def main_upsert_single_document(doc_url: str):
+def main_upsert_single_document(doc_url: str, name: str):
     """
     Script to upsert a single document by URL. metada_map parameter will be empty dict ({})
     This script is useful when trying to use your own PDF files.
     """
-    asyncio.run(upsert_single_document(doc_url))
+    asyncio.run(upsert_single_document(doc_url, name))
 
 if __name__ == "__main__":
     Fire(main_upsert_single_document)

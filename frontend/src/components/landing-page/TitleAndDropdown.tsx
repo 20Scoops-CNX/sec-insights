@@ -80,21 +80,7 @@ export const TitleAndDropdown = () => {
           </button>
         </a>
       </div>
-      <div className="mt-28 flex flex-col items-center">
-        <div className="w-4/5 text-center text-4xl">
-          Empower your organization&apos;s Business Intelligence with{" "}
-          <span className="font-bold">SEC Insights </span>
-        </div>
-        <div className="mt-4 flex items-center justify-center">
-          <div className="w-3/5 text-center font-nunito">
-            Effortlessly analyze multifaceted financial documents such as 10-Ks
-            and 10-Qs.
-          </div>
-        </div>
-        <div className="mt-4 flex items-center justify-center">
-          <GitHubButton href="https://github.com/run-llama/sec-insights">Open-Sourced on Github</GitHubButton>
-        </div>
-      </div>
+      <div className="mt-28 flex flex-col items-center"/>
       {isMobile ? (
         <div className="mt-12 flex h-1/5 w-11/12 rounded border p-4 text-center">
           <div className="text-xl font-bold">
@@ -108,7 +94,7 @@ export const TitleAndDropdown = () => {
             explore
           </div>
           <div className="h-1/8 flex w-full flex-wrap items-center justify-center font-nunito">
-            <div className="m-1 flex w-96 items-center">
+            <div className="m-1 flex w-3/4 items-center">
               <DocumentSelectCombobox
                 selectedItem={selectedTicker}
                 setSelectedItem={selectTicker}
@@ -122,55 +108,11 @@ export const TitleAndDropdown = () => {
                 </span>
               </div>
             </div>
-            <div className="m-1 flex h-[41px] w-56 items-center bg-[#F7F7F7]">
-              <div className="flex h-[41px] w-[30px] items-center justify-center bg-[#F7F7F7] pl-3">
-                <CgFileDocument size={30} />
-              </div>
-              <div className="flex-grow">
-                <Select
-                  openMenuOnFocus
-                  ref={documentTypeFocusRef}
-                  options={availableDocumentTypes}
-                  onChange={selectDocumentType}
-                  getOptionLabel={(option: SelectOption) => option.label}
-                  getOptionValue={(option: SelectOption) => option.value}
-                  value={selectedDocumentType}
-                  placeholder="Select Document Type"
-                  components={{
-                    IndicatorSeparator: () => null,
-                    DropdownIndicator: () => null,
-                  }}
-                  styles={customReactSelectStyles}
-                />
-              </div>
-            </div>
-            <div className="m-1 flex h-[41px] w-48 items-center rounded-e bg-[#F7F7F7]">
-              <div className="flex h-[41px] w-[30px] items-center justify-center bg-[#F7F7F7] pl-3">
-                <AiTwotoneCalendar size={30} />
-              </div>
-              <div className="flex-grow">
-                <Select
-                  openMenuOnFocus
-                  ref={yearFocusRef}
-                  options={sortedAvailableYears || []}
-                  getOptionLabel={(option: SelectOption) => option.label}
-                  getOptionValue={(option: SelectOption) => option.value}
-                  onChange={setSelectedYear}
-                  value={selectedYear}
-                  placeholder="Select Year"
-                  components={{
-                    IndicatorSeparator: () => null,
-                    DropdownIndicator: () => null,
-                  }}
-                  styles={customReactSelectStyles}
-                />
-              </div>
-            </div>
             <div className="relative">
               <button
                 className="m-4 rounded border bg-llama-indigo px-8 py-2 text-white hover:bg-[#3B3775] disabled:bg-gray-30"
                 onClick={handleAddDocument}
-                disabled={!isDocumentSelectionEnabled || !selectedYear}
+                disabled={selectedTicker === null}
               >
                 Add
               </button>
@@ -202,13 +144,13 @@ export const TitleAndDropdown = () => {
                 )}
               >
                 <div className="w-64 text-left">
-                  <span className="font-bold">{doc.ticker}</span> -{" "}
+                  {/* <span className="font-bold">{doc.ticker}</span> -{" "} */}
                   {doc.fullName}
                 </div>
-                <div className="w-24 text-left">
+                {/* <div className="w-24 text-left">
                   {doc.year} {doc.quarter && `Q${doc.quarter}`}
                 </div>
-                <div>{doc.docType}</div>
+                <div>{doc.docType}</div> */}
                 <button
                   className="mr-4 group-hover:text-[#FF0000]"
                   onClick={() => handleRemoveDocument(index)}

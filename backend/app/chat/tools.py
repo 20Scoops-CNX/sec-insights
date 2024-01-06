@@ -79,8 +79,8 @@ def describe_financials(financials: StockFinancial) -> str:
 
 def get_tool_metadata_for_document(doc: DocumentSchema) -> ToolMetadata:
     doc_title = build_title_for_document(doc)
-    name = f"extract_json_from_sec_document[{doc_title}]"
-    description = f"Returns basic financial data extracted from the SEC filing document {doc_title}"
+    name = f"extract_json_from_real estate_document[{doc_title}]"
+    description = f"Returns basic financial data extracted from the real estate filing document {doc_title}"
     return ToolMetadata(
         name=name,
         description=description,
@@ -88,8 +88,8 @@ def get_tool_metadata_for_document(doc: DocumentSchema) -> ToolMetadata:
 
 
 def get_polygion_io_sec_tool(document: DocumentSchema) -> FunctionTool:
-    sec_metadata = SecDocumentMetadata.parse_obj(
-        document.metadata_map[DocumentMetadataKeysEnum.SEC_DOCUMENT]
+    metadata = SecDocumentMetadata.parse_obj(
+        document.metadata_map[DocumentMetadataKeysEnum.NAME]
     )
     tool_metadata = get_tool_metadata_for_document(document)
 
@@ -104,8 +104,8 @@ def get_polygion_io_sec_tool(document: DocumentSchema) -> FunctionTool:
             )
             client = cast(AsyncReferenceClient, client)
             response_dict = await client.get_stock_financials_vx(
-                ticker=sec_metadata.company_ticker,
-                period_of_report_date=str(sec_metadata.period_of_report_date.date()),
+                ticker=metadata.company_ticker,
+                period_of_report_date=str(metadata.period_of_report_date.date()),
                 limit=100,  # max limit is 100
             )
             stock_financials = []
@@ -152,7 +152,7 @@ def get_api_query_engine_tool(
         [polygon_io_tool],
         llm=service_context.llm,
         callback_manager=service_context.callback_manager,
-        system_prompt=f"You are an agent that is asked quantitative questions about a SEC filing named {doc_title} and you answer them by using your tools.",
+        system_prompt=f"You are an agent that is asked quantitative questions about a real estate filing named {doc_title} and you answer them by using your tools.",
     )
     return QueryEngineTool.from_defaults(
         query_engine=agent,

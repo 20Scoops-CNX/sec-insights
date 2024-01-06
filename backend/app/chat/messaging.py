@@ -39,6 +39,7 @@ class ChatCallbackHandler(BaseCallbackHandler):
         ignored_events = [CBEventType.CHUNKING, CBEventType.NODE_PARSING]
         super().__init__(ignored_events, ignored_events)
         self._send_chan = send_chan
+        print("Initialize the base callback handler")
 
     def on_event_start(
         self,
@@ -75,15 +76,16 @@ class ChatCallbackHandler(BaseCallbackHandler):
         is_start_event: bool = False,
     ) -> SubProcessMetadataMap:
         metadata_map = {}
-
         if (
             event_type == CBEventType.SUB_QUESTION
             and EventPayload.SUB_QUESTION in payload
         ):
             sub_q: SubQuestionAnswerPair = payload[EventPayload.SUB_QUESTION]
+            # Note: Here's the way to map a question
             metadata_map[
                 SubProcessMetadataKeysEnum.SUB_QUESTION.value
             ] = schema.QuestionAnswerPair.from_sub_question_answer_pair(sub_q).dict()
+            
         return metadata_map
 
     async def async_on_event(
@@ -99,10 +101,12 @@ class ChatCallbackHandler(BaseCallbackHandler):
         )
         metadata_map = metadata_map or None
         source = MessageSubProcessSourceEnum[event_type.name]
+        print("SESSION", self._send_chan._closed)
         if self._send_chan._closed:
             logger.debug("Received event after send channel closed. Ignoring.")
             return
         try:
+            print("SEND...")
             await self._send_chan.send(
                 StreamedMessageSubProcess(
                     source=source,
@@ -134,6 +138,7 @@ async def handle_chat_message(
         chat_engine = await get_chat_engine(
             ChatCallbackHandler(send_chan), conversation
         )
+        # send stream to frontend
         await send_chan.send(
             StreamedMessageSubProcess(
                 event_id=str(uuid4()),
@@ -143,10 +148,10 @@ async def handle_chat_message(
         )
         logger.debug("Engine received")
         templated_message = f"""
-Remember - if I have asked a relevant financial question, use your tools.
 
 {user_message.content}
         """.strip()
+        print("TEMPLATED MESSAGE1",templated_message)
         streaming_chat_response: StreamingAgentChatResponse = (
             await chat_engine.astream_chat(templated_message)
         )

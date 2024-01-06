@@ -53,12 +53,12 @@ export const useDocumentSelector = () => {
   const [selectedYear, setSelectedYear] = useState<SelectOption | null>(null);
 
   const handleAddDocument = () => {
-    if (selectedTicker && selectedDocumentType && selectedYear) {
+    if (selectedTicker) {
       setSelectedDocuments((prevDocs = []) => {
-        if (prevDocs.find((doc) => doc.id === selectedYear.value)) {
+        if (prevDocs.find((doc) => doc.fullName === selectedTicker.fullName)) {
           return prevDocs;
         }
-        const newDoc = findDocumentById(selectedYear.value, availableDocuments);
+        const newDoc = findDocumentById(selectedTicker.fullName, availableDocuments);
         return newDoc ? [newDoc, ...prevDocs] : prevDocs;
       });
       setSelectedTicker(null);
